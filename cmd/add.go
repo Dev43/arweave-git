@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"io"
 	"os"
@@ -18,6 +17,8 @@ func init() {
 	rootCmd.AddCommand(balanceCmd)
 }
 
+const TEMP_GZIP = "temp.tar.gz"
+
 var balanceCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Adds the files into staging",
@@ -27,29 +28,25 @@ var balanceCmd = &cobra.Command{
 			dirToUpload = args[0]
 		}
 
-		info, err := os.Stat(dirToUpload)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(info)
-
-		fmt.Println(filepath.Dir("."))
-		fmt.Println(filepath.Base(dirToUpload))
-
-		err = ensureRepositoryIsClean(dirToUpload)
+		err := ensureRepositoryIsClean(dirToUpload)
 		if err != nil {
 			panic(err)
 		}
 
 		// grab the whole directory, tar and zip it in memory
 
-		dir, err := os.Open(dirToUpload)
+		directory, err := os.Open(dirToUpload)
 		if err != nil {
 			panic(err)
 		}
-		defer dir.Close()
+		defer directory.Close()
 
-		err = tarDirectory(dirToUpload, dir)
+		err = tarAndGzipDirectory(directory)
+		if err != nil {
+			panic(err)
+		}
+
+		err = untarAndGzipDirectory(TEMP_GZIP)
 		if err != nil {
 			panic(err)
 		}
@@ -90,9 +87,10 @@ func ensureRepositoryIsClean(directory string) error {
 	return nil
 }
 
-func tarDirectory(path string, w io.Writer) error {
+func tarAndGzipDirectory(directory *os.File) error {
+	path := directory.Name()
 
-	tarfile, err := os.Create("temp.tar.gz")
+	tarfile, err := os.Create(TEMP_GZIP)
 	if err != nil {
 		panic(err)
 	}
@@ -116,6 +114,10 @@ func tarDirectory(path string, w io.Writer) error {
 	defer targetWriter.Close()
 
 	return filepath.Walk(path, func(currentPath string, info os.FileInfo, err error) error {
+		if info.Name() == TEMP_GZIP {
+			return nil
+		}
+
 		if err != nil {
 			return err
 		}
@@ -125,12 +127,12 @@ func tarDirectory(path string, w io.Writer) error {
 		}
 
 		if baseDir != "" {
-			header.Name = filepath.Join(baseDir, strings.TrimPrefix(currentPath, path))
-			fmt.Println(header.Name)
+			header.Name = filepath.Join(baseDir, currentPath)
 		}
 		if info.IsDir() {
 			return nil
 		}
+		header.Size = info.Size()
 
 		if err := targetWriter.WriteHeader(header); err != nil {
 			return err
@@ -143,10 +145,53 @@ func tarDirectory(path string, w io.Writer) error {
 		defer file.Close()
 
 		_, err = io.Copy(targetWriter, file)
-		fmt.Println("the err", err)
 
 		return err
-
 	})
 
+}
+
+func untarAndGzipDirectory(fileName string) error {
+	reader, err := os.Open(fileName)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+	gzipReader, err := gzip.NewReader(reader)
+	if err != nil {
+		return err
+	}
+	tarReader := tar.NewReader(gzipReader)
+
+	for {
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		path := filepath.Join("temp", header.Name)
+		info := header.FileInfo()
+		dirName, _ := filepath.Split(path)
+
+		// here we need to change the folders permissions so we can actually write into them
+		if err = os.MkdirAll(dirName, os.ModePerm); err != nil {
+			return err
+		}
+		if info.IsDir() {
+			continue
+		}
+
+		file, err := os.OpenFile(path, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, info.Mode())
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = io.Copy(file, tarReader)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
