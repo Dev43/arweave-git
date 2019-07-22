@@ -17,7 +17,6 @@ import (
 	"github.com/Dev43/arweave-go/tx"
 	"github.com/Dev43/arweave-go/wallet"
 
-
 	"github.com/spf13/cobra"
 	"gopkg.in/src-d/go-git.v4"
 )
@@ -29,8 +28,8 @@ func init() {
 const TEMPGZIP = "temp.tar.gz"
 
 var addCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Adds the files into staging",
+	Use:   "push",
+	Short: "Pushes a release into the weave",
 	Run: func(cmd *cobra.Command, args []string) {
 		dirToUpload := "."
 		if len(args) > 0 {
@@ -94,11 +93,6 @@ var addCmd = &cobra.Command{
 			panic(err)
 		}
 
-		ar, err := transactor.NewTransactor("178.128.86.17")
-		if err != nil {
-			panic(err)
-		}
-
 		tx, err := sendToArweaveNetwork(ar, toSend)
 		if err != nil {
 			panic(err)
@@ -133,7 +127,6 @@ var addCmd = &cobra.Command{
 	},
 }
 
-
 func ensureRepositoryIsClean(r *git.Repository, directory string) error {
 
 	w, err := r.Worktree()
@@ -158,32 +151,32 @@ func sendToArweaveNetwork(ar *transactor.Transactor, toSend []byte) (*tx.Transac
 	// create a new wallet instance
 	w := wallet.NewWallet()
 	// extract the key from the wallet instance
-	err := w.ExtractKey("arweave.json")
+	err := w.LoadKeyFromFile("arweave.json")
 	if err != nil {
 		return nil, err
 	}
 
 	// create a transaction
-	tx, err := ar.CreateTransaction(w, "0", toSend, "xblmNxr6cqDT0z7QIWBCo8V0UfJLd3CRDffDhF5Uh9g")
+	txBuilder, err := ar.CreateTransaction(context.TODO(), w, "0", toSend, "xblmNxr6cqDT0z7QIWBCo8V0UfJLd3CRDffDhF5Uh9g")
 	if err != nil {
 		return nil, err
 	}
 	// sign the transaction
-	err = tx.Sign(w)
+	txn, err := txBuilder.Sign(w)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println(tx.EncodedID())
+	fmt.Println(txn.Hash())
 
 	// send the transaction
-	resp, err := ar.SendTransaction(tx)
+	resp, err := ar.SendTransaction(context.TODO(), txn)
 	if err != nil {
 		return nil, err
 	}
 
 	fmt.Println(resp)
-	return tx.Format(), err
+	return txn, err
 
 }
 

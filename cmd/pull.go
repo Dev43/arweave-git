@@ -4,14 +4,15 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/Dev43/arweave-go/transactor"
 	"github.com/spf13/cobra"
 )
 
@@ -28,30 +29,25 @@ var pullCmd = &cobra.Command{
 		hash := args[0]
 
 		// set destination if needed.. default is a new folder with the name of the git folder
-
-		ar, err := transactor.NewTransactor("178.128.86.17")
+		tx, err := ar.Client.GetTransaction(context.TODO(), hash)
 		if err != nil {
 			panic(err)
 		}
-
-		tx, err := ar.Client.GetTransaction(hash)
-		if err != nil {
-			panic(err)
-		}
-
-		decodedRaw, err := base64.RawURLEncoding.DecodeString(tx.Data)
+		b, _ := base64.RawURLEncoding.DecodeString(tx.Data())
+		decodedRaw := string(b)
 		if err != nil {
 			panic(err)
 		}
 		// unmarshal the data
 		gitInfo := ArweaveRelease{}
-		json.Unmarshal(decodedRaw, &gitInfo)
+		json.Unmarshal([]byte(decodedRaw), &gitInfo)
 
 		fileNames := strings.Split(gitInfo.Repository, "/")
 		fileName := strings.Replace(fileNames[len(fileNames)-1], ".git", "", -1)
 
 		decodedData, err := base64.RawURLEncoding.DecodeString(gitInfo.Data)
-		reader := bytes.NewReader(decodedData)
+		reader := bytes.NewReader([]byte(decodedData))
+		fmt.Println(gitInfo.Data)
 
 		err = untarAndUnzip(fileName, reader)
 		if err != nil {
