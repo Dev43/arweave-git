@@ -39,7 +39,7 @@ var keyPath string
 var withCommit bool
 
 func init() {
-	pushCmd.Flags().StringSliceVar(&inputTags, "tags", nil, "Comma seperated list of tags to add to the arweave transaction")
+	pushCmd.Flags().StringSliceVar(&inputTags, "tags", nil, "Comma separated list of tags to add to the arweave transaction")
 	pushCmd.Flags().StringVar(&keyPath, "key-path", "./arweave.json", "Path of the arweave key file to use")
 	pushCmd.Flags().BoolVar(&withCommit, "commit", false, "Whether or not we want our push action to add a commit with the new transaction ID. Default is false.")
 	releaseCmd.AddCommand(pushCmd)
