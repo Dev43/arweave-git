@@ -5,6 +5,8 @@ github.com/Dev43/arweave-go v0.0.0-20190722125740-2b6cd4047350 h1:8kS2su+CSU1VDL
 github.com/Dev43/arweave-go v0.0.0-20190722125740-2b6cd4047350/go.mod h1:YYrehMVoC0zvwA3CC0vP2AgjOtl1o5notOcruHa7OW8=
 github.com/Dev43/arweave-go v0.0.1 h1:sYp2IcaQimiGhVOPFmE34XicpLPgDxFVfFYmvcg2G7o=
 github.com/Dev43/arweave-go v0.0.1/go.mod h1:YYrehMVoC0zvwA3CC0vP2AgjOtl1o5notOcruHa7OW8=
+github.com/Dev43/arweave-go v0.0.2-0.20190723093622-1bef286ac4d2 h1:sXH3M7xnm4cF3QBMPodob1r3mhE10J0Yh7c0NmLG+EI=
+github.com/Dev43/arweave-go v0.0.2-0.20190723093622-1bef286ac4d2/go.mod h1:C6uCtHMNvsimhVAnVWO7vs3c3Ug6IaHu6ITxklyv/1U=
 github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7 h1:uSoVVbwJiQipAclBbw+8quDsfcvFjOpI5iCf4p/cqCs=
 github.com/alcortesm/tgz v0.0.0-20161220082320-9c5fe88206d7/go.mod h1:6zEj6s6u/ghQa61ZWa/C2Aw3RkjiTBOix7dkqa1VLIs=
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
