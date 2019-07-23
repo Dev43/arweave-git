@@ -24,7 +24,7 @@ Currently you have access to 2 actions `push` and `pull`
 
 Pull is the simplest action to take, it allows you to pull a repository from the weave using the transaction hash only. Also it is free. The repository needs to have the same formatting as done in this package for it to pull properly. Currently all repository are tarred and compressed using Gzip before being pushed to the arweave.
 
-An example for pull is `arweave-git release pull <ADDRESS> ` which will actually pull this repository.
+An example for pull is `arweave-git release pull 1M9FZn9uwY3g8uisOZUFvLa_nBFKqGcheP9L4VTId1I` which will actually pull this repository.
 
 ### Push
 
