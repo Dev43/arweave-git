@@ -71,12 +71,11 @@ var pushCmd = &cobra.Command{
 		}
 		defer directory.Close()
 
-		defer deleteFile(tempGzip)
-
 		err = tarAndGzipDirectory(directory)
 		if err != nil {
 			log.Fatal(fmt.Errorf("error when executing tar and gzip on directory %s", err.Error()))
 		}
+		defer deleteFile(tempGzip)
 
 		tarredData, err := ioutil.ReadFile(tempGzip)
 		if err != nil {
@@ -134,7 +133,6 @@ var pushCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(fmt.Errorf("could not create arweave transaction"))
 		}
-		_ = txBuilder
 
 		tx, err := sendToArweaveNetwork(ar, w, txBuilder)
 		if err != nil {
@@ -307,10 +305,11 @@ func tarAndGzipDirectory(directory *os.File) error {
 		return nil
 	}
 
-	var baseDir string
+	var fileDir string
 	if info.IsDir() {
-		baseDir = filepath.Base(path)
+		fileDir = filepath.Base(path)
 	}
+	var baseDir = filepath.Dir(path)
 
 	// Should GZIP and Tar ball our file
 	targetWriter := tar.NewWriter(fileWriter)
@@ -329,13 +328,31 @@ func tarAndGzipDirectory(directory *os.File) error {
 			return err
 		}
 
-		if baseDir != "" {
-			header.Name = filepath.Join(baseDir, currentPath)
+		if fileDir != "" {
+			relativeFilePath, err := filepath.Rel(baseDir, currentPath)
+			if err != nil {
+				return err
+			}
+			header.Name = relativeFilePath
 		}
+
+		// handle directories
 		if info.IsDir() {
-			return nil
+			return targetWriter.WriteHeader(header)
 		}
+
 		header.Size = info.Size()
+
+		// handle symlinks
+		if info.Mode()&os.ModeSymlink != 0 {
+			link, err := os.Readlink(currentPath)
+			if err != nil {
+				return err
+			}
+			header.Linkname = link
+			header.Typeflag = tar.TypeSymlink
+			return targetWriter.WriteHeader(header)
+		}
 
 		if err := targetWriter.WriteHeader(header); err != nil {
 			return err
