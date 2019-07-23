@@ -1,4 +1,5 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/Dev43/arweave v0.0.0-20180929211307-1335b1b8acaa h1:NknhaGVnovcurT32ZobxXFhUG2UBMrSJDbWg+LZVu9o=
 github.com/Dev43/arweave-go v0.0.0-20190719124715-64868f78943f h1:gHUtg7yBY3pQaID+JPatvR5gaIrAYnnkz3DXZbVWn14=
 github.com/Dev43/arweave-go v0.0.0-20190719124715-64868f78943f/go.mod h1:YYrehMVoC0zvwA3CC0vP2AgjOtl1o5notOcruHa7OW8=
 github.com/Dev43/arweave-go v0.0.0-20190722125740-2b6cd4047350 h1:8kS2su+CSU1VDLTbBT/+Xq7AswKhW6EwBmHyvFx+wak=

@@ -29,7 +29,7 @@ import (
 const tempGzip = "temp.tar.gz"
 const repoRootTagVersion = "0.0.1"
 const kvDelimiter = ":"
-const repoRootTag = "git-arweave"
+const repoRootTag = "arweave-git"
 const arweaveFilename = ".arweave"
 const arweaveDataversion = "0.0.1"
 

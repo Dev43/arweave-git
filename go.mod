@@ -1,4 +1,4 @@
-module github.com/Dev43/git-arweave
+module github.com/Dev43/arweave-git
 
 go 1.12
 
