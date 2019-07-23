@@ -30,7 +30,7 @@ var rootCmd = &cobra.Command{
 
 // Execute is our top line function for all CLI commands
 func Execute() {
-	rootCmd.Flags().StringVar(&url, "url", "127.0.0.1", "URL of the arweave host")
+	rootCmd.PersistentFlags().StringVar(&url, "url", "127.0.0.1", "URL of the arweave host")
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
