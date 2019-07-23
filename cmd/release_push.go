@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 
 	"io"
@@ -21,13 +22,9 @@ import (
 	"gopkg.in/src-d/go-git.v4"
 )
 
-func init() {
-	rootCmd.AddCommand(addCmd)
-}
-
 const TEMPGZIP = "temp.tar.gz"
 
-var addCmd = &cobra.Command{
+var pushCmd = &cobra.Command{
 	Use:   "push",
 	Short: "Pushes a release into the weave",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -38,25 +35,24 @@ var addCmd = &cobra.Command{
 
 		r, err := git.PlainOpen(dirToUpload)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("could not open git directory %s, please ensure it is a git directory", dirToUpload))
 		}
 
 		err = ensureRepositoryIsClean(r, dirToUpload)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		// grab the whole directory, tar and zip it in memory
-
 		directory, err := os.Open(dirToUpload)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("could not open directory %s", dirToUpload))
 		}
 		defer directory.Close()
 
 		err = tarAndGzipDirectory(directory)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("error when executing tar and gzip on directory %s", err.Error()))
 		}
 
 		// now we've created a tar and gzipped file, we need to load it in memory
@@ -65,12 +61,12 @@ var addCmd = &cobra.Command{
 
 		tarredData, err := ioutil.ReadFile(TEMPGZIP)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("error reading tar and gzip directory %s %s", TEMPGZIP, err.Error()))
 		}
 
 		commit, err := getLastCommit(r)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("could not get last commit of repository"))
 		}
 
 		conf, err := r.Config()
@@ -100,7 +96,6 @@ var addCmd = &cobra.Command{
 		fmt.Println(tx.ID)
 
 		ctx := context.TODO()
-
 		pendingTx, err := ar.WaitMined(ctx, tx)
 		if err != nil {
 			panic(err)

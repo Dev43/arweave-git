@@ -16,10 +16,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	rootCmd.AddCommand(pullCmd)
-}
-
 var pullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pulls a release from the weave",
