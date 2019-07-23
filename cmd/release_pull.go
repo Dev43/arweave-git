@@ -81,7 +81,9 @@ func untarAndUnzip(folderName string, data io.Reader) error {
 		path := filepath.Join(folderName, header.Name)
 		info := header.FileInfo()
 		dirName, _ := filepath.Split(path)
-
+		if dirName == "" {
+			continue
+		}
 		// here we need to change the folders permissions so we can actually write into them
 		if err = os.MkdirAll(dirName, os.ModePerm); err != nil {
 			return err
