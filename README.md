@@ -1,5 +1,9 @@
 # Git Arweave Bridge
 
+[![License](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Dev43/arweave-git/blob/master/LICENSE)
+[![GoDoc](https://godoc.org/github.com/golang/gddo?status.svg)](https://godoc.org/github.com/Dev43/arweave-git)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Dev43/arweave-git)](https://goreportcard.com/report/github.com/Dev43/arweave-git)
+
 Eternally save a code releases to the Arweave
 
 ## Requirements
