@@ -9,6 +9,7 @@ import (
 
 // Global variable for the package
 var ar *transactor.Transactor
+var url string
 
 var rootCmd = &cobra.Command{
 	Use:   "git",
@@ -18,7 +19,7 @@ var rootCmd = &cobra.Command{
 		// check the url passed
 		// check if we can connect
 		var err error
-		ar, err = transactor.NewTransactor("178.128.86.17")
+		ar, err = transactor.NewTransactor(url)
 		if err != nil {
 			panic(err)
 		}
@@ -29,7 +30,7 @@ var rootCmd = &cobra.Command{
 
 // Execute is our top line function for all CLI commands
 func Execute() {
-
+	rootCmd.Flags().StringVar(&url, "url", "127.0.0.1", "URL of the arweave host")
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
 	}
