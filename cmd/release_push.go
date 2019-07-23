@@ -117,7 +117,7 @@ var pushCmd = &cobra.Command{
 			log.Fatal(fmt.Errorf("could not initialize arweave wallet"))
 		}
 
-		tags := []map[string]interface{}{map[string]interface{}{repoRootTag: repoRootTagVersion}}
+		tags := []map[string]interface{}{{repoRootTag: repoRootTagVersion}}
 		for _, tag := range inputTags {
 			key := tag
 			value := tag
