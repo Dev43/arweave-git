@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,39 +17,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func init() {
+	releaseCmd.AddCommand(pullCmd)
+}
+
 var pullCmd = &cobra.Command{
-	Use:   "pull",
+	Use:   "pull [address]",
 	Short: "Pulls a release from the weave",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 
-		hash := args[0]
+		address := args[0]
 
 		// set destination if needed.. default is a new folder with the name of the git folder
-		tx, err := ar.Client.GetTransaction(context.TODO(), hash)
+		tx, err := ar.Client.GetTransaction(context.TODO(), address)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("could not retrieve transaction with hash %s %s", address, err.Error()))
 		}
-		b, _ := base64.RawURLEncoding.DecodeString(tx.Data())
-		decodedRaw := string(b)
+		b, err := base64.RawURLEncoding.DecodeString(tx.Data())
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("error decoding transaction data field"))
 		}
+		decodedStringRaw := string(b)
 		// unmarshal the data
 		gitInfo := ArweaveRelease{}
-		json.Unmarshal([]byte(decodedRaw), &gitInfo)
+		err = json.Unmarshal([]byte(decodedStringRaw), &gitInfo)
+		if err != nil {
+			log.Fatal(fmt.Errorf("error unmarshaling arweave transaction data into information struct"))
+		}
 
 		fileNames := strings.Split(gitInfo.Repository, "/")
 		fileName := strings.Replace(fileNames[len(fileNames)-1], ".git", "", -1)
 
 		decodedData, err := base64.RawURLEncoding.DecodeString(gitInfo.Data)
+		if err != nil {
+			log.Fatal(fmt.Errorf("error decoding data field of information struct"))
+		}
 		reader := bytes.NewReader([]byte(decodedData))
-		fmt.Println(gitInfo.Data)
-
 		err = untarAndUnzip(fileName, reader)
 		if err != nil {
-			panic(err)
+			log.Fatal(fmt.Errorf("error untarring and unzipping data %s", err.Error()))
 		}
+		fmt.Printf("Successfully downloaded repository %s \n", gitInfo.Repository)
 
 	},
 }

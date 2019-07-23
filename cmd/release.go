@@ -7,8 +7,6 @@ import (
 )
 
 func init() {
-	releaseCmd.AddCommand(pullCmd)
-	releaseCmd.AddCommand(pushCmd)
 	rootCmd.AddCommand(releaseCmd)
 }
 
